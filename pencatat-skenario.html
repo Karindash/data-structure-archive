@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pencatat Skenario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eef1f5; --surface:#fbfcfd; --ink:#1b2340; --muted:#5b6482; --line:#cfd6e2;
+  --accent:#1f6f6b; --accent-ink:#ffffff; --mark:#f2c94c; --danger:#b3372f; --tint:#e3efee;
+  --head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141a2b; --surface:#1c2439; --ink:#e6eaf6; --muted:#9aa3c0; --line:#2f3a58;
+    --accent:#5cc3bb; --accent-ink:#0f1a2a; --mark:#e0b93f; --danger:#ff8b82; --tint:#1e3038;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141a2b; --surface:#1c2439; --ink:#e6eaf6; --muted:#9aa3c0; --line:#2f3a58;
+  --accent:#5cc3bb; --accent-ink:#0f1a2a; --mark:#e0b93f; --danger:#ff8b82; --tint:#1e3038;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background-color:var(--bg); color:var(--ink);
+  font:400 16px/1.55 var(--body);
+  background-image:
+    linear-gradient(to right,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px),
+    linear-gradient(to bottom,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 56px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font:700 clamp(1.7rem,4vw,2.4rem)/1.1 var(--head);margin:0;letter-spacing:-.01em}
+.sub{margin:6px 0 0;color:var(--muted);max-width:52ch}
+h2{font:700 1.25rem/1.2 var(--head);margin:0 0 10px}
+h3{font:600 1rem/1.3 var(--head);margin:0 0 6px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;min-height:40px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent}
+button.danger{color:var(--danger)}
+input,select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+textarea{resize:vertical}
+label{display:block;font-weight:600;font-size:.92rem;margin:0 0 4px}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:2px solid var(--line);margin-bottom:20px}
+.tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;padding:10px 14px;margin-bottom:-2px;white-space:nowrap;font-weight:600;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--mark)}
+.panel[hidden]{display:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.grid2{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:860px){.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.field{margin-bottom:12px}
+.group{margin:16px 0 8px}
+.group p{margin:0 0 8px;color:var(--muted);font-size:.9rem}
+.row{display:grid;gap:6px;margin-bottom:8px;padding:8px;border:1px dashed var(--line);border-radius:8px}
+.row-part,.row-chg{grid-template-columns:1fr 1fr}
+.row-req{grid-template-columns:1fr 1fr}
+.row .x{grid-column:1/-1;justify-self:end;min-height:32px;padding:4px 10px;font-size:.88rem}
+.row-part input:nth-child(3){grid-column:1/-1}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--tint);border:1px solid var(--line);font-size:.85rem}
+.chip b{font-weight:600;margin-left:4px;color:var(--accent)}
+.scn{margin-bottom:12px}
+.scn .out{color:var(--muted);margin:0 0 8px}
+.scn ul{margin:6px 0;padding-left:18px;font-size:.92rem}
+.scn .k{color:var(--muted)}
+.scn .btns{display:flex;gap:6px;margin-top:8px}
+.scn .btns button{min-height:32px;padding:4px 10px;font-size:.88rem}
+.filters{display:grid;gap:8px;grid-template-columns:1fr;margin-bottom:12px}
+@media (min-width:560px){.filters{grid-template-columns:2fr 1fr 1fr}}
+.empty{padding:20px;border:1px dashed var(--line);border-radius:10px;text-align:center;color:var(--muted)}
+.status{min-height:1.5em;margin:8px 0 0;font-size:.92rem;color:var(--accent);font-weight:600}
+.chain{display:grid;gap:8px;align-items:stretch;grid-template-columns:1fr;margin-bottom:14px}
+@media (min-width:700px){.chain{grid-template-columns:1fr auto 1fr}}
+.chain .node{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.chain .link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;font-size:.85rem;color:var(--muted);min-width:150px}
+.chain .link span{background:var(--mark);color:#222;padding:2px 10px;border-radius:6px;font-weight:600}
+.chain .link i{display:block;width:2px;height:16px;background:var(--mark)}
+@media (min-width:700px){.chain .link i{width:100%;height:2px}}
+.node small{color:var(--muted);display:block}
+.note-list{margin:0;padding-left:20px}
+.note-list li{margin-bottom:6px}
+pre.schema{margin:0;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);overflow-x:auto;font:400 .85rem/1.5 var(--mono)}
+.tbl{overflow-x:auto}
+textarea.json{font:400 .82rem/1.5 var(--mono);min-height:340px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Pencatat Skenario</h1>
+      <p class="sub">Catat kejadian sebagai peran dan perubahan kondisi, bukan cerita. Sambungannya muncul sendiri.</p>
+    </div>
+    <button type="button" class="ghost" id="theme-btn">Ganti tema</button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Bagian aplikasi">
+    <button class="tab" role="tab" id="t-catatan" aria-controls="p-catatan" aria-selected="true">Catatan</button>
+    <button class="tab" role="tab" id="t-skenario" aria-controls="p-skenario" aria-selected="false">Skenario</button>
+    <button class="tab" role="tab" id="t-sambung" aria-controls="p-sambung" aria-selected="false">Sambungan</button>
+    <button class="tab" role="tab" id="t-json" aria-controls="p-json" aria-selected="false">Keluaran JSON</button>
+  </div>
+
+  <!-- CATATAN -->
+  <section class="panel" id="p-catatan" role="tabpanel" aria-labelledby="t-catatan">
+    <div class="grid2">
+      <div class="card">
+        <h2>Tiga ide inti</h2>
+        <ol class="note-list">
+          <li><b>Peran, bukan kolom.</b> Subjek, latar, dan objek adalah peran yang dipakai entitas. "Mobil" bisa diganti "Laptop" tanpa mengubah struktur.</li>
+          <li><b>Sambungan berbasis kondisi.</b> Setiap kejadian punya syarat awal dan efek akhir. Kejadian B menyusul A kalau efek A cocok dengan syarat B.</li>
+          <li><b>Kategori berupa tag.</b> Label seperti kendala, sosial, atau aksi ditambah bebas, karena pola baru dicari dari data.</li>
+        </ol>
+        <h3 style="margin-top:16px">Pisahkan lima hal ini</h3>
+        <p class="sub" style="margin:0">Motivasi, pemicu, aksi, hasil, konsekuensi. Jangan digabung dalam satu kolom "canon event".</p>
+      </div>
+      <div class="card">
+        <h2>Bentuk data</h2>
+        <pre class="schema">entity       id, nama, atribut
+scenario     id, ringkasan, hasil
+participant  scenario, entity, peran, kondisi awal
+state_change scenario, entity, atribut, dari, jadi
+requirement  scenario, atribut, nilai yang dibutuhkan
+tag          nama (bebas)</pre>
+        <p class="sub">Di aplikasi ini semuanya disimpan sebagai satu daftar JSON di browser. Cukup untuk uji coba, tanpa SQL.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Tahapan</h2>
+      <ol class="note-list">
+        <li><b>Kumpulkan data.</b> Isi ratusan skenario dari satu objek sederhana. Kolom perubahan dan syarat boleh kosong dulu.</li>
+        <li><b>Tambah kondisi.</b> Isi perubahan dan syarat, lalu lihat tab Sambungan.</li>
+        <li><b>Cari pola.</b> Ganti objek, lalu bandingkan tag dan peran yang berulang.</li>
+      </ol>
+      <div class="actions"><button type="button" class="primary" data-go="skenario">Mulai mencatat</button></div>
+    </div>
+  </section>
+
+  <!-- SKENARIO -->
+  <section class="panel" id="p-skenario" role="tabpanel" aria-labelledby="t-skenario" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2 id="form-title">Skenario baru</h2>
+        <div class="field">
+          <label for="f-summary">Ringkasan kejadian</label>
+          <input id="f-summary" placeholder="Mobil S mogok di jalan ke kampus">
+        </div>
+        <div class="field">
+          <label for="f-outcome">Hasil</label>
+          <input id="f-outcome" placeholder="S terlambat masuk kelas">
+        </div>
+        <div class="field">
+          <label for="f-tags">Tag (pisahkan dengan koma)</label>
+          <input id="f-tags" placeholder="kendala, transportasi">
+        </div>
+
+        <div class="group">
+          <h3>Pelaku dan peran</h3>
+          <p>Siapa atau apa yang terlibat, dan sebagai apa.</p>
+          <div id="box-part"></div>
+          <button type="button" class="ghost" id="add-part">Tambah pelaku</button>
+        </div>
+        <div class="group">
+          <h3>Perubahan kondisi</h3>
+          <p>Apa yang berubah setelah kejadian ini.</p>
+          <div id="box-chg"></div>
+          <button type="button" class="ghost" id="add-chg">Tambah perubahan</button>
+        </div>
+        <div class="group">
+          <h3>Syarat awal</h3>
+          <p>Kondisi yang harus sudah ada supaya kejadian ini bisa terjadi.</p>
+          <div id="box-req"></div>
+          <button type="button" class="ghost" id="add-req">Tambah syarat</button>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="primary" id="save-btn">Simpan skenario</button>
+          <button type="button" id="reset-form">Kosongkan form</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Daftar skenario <span class="chip" id="count">0</span></h2>
+          <div class="filters">
+            <input id="q" type="search" placeholder="Cari teks" aria-label="Cari teks">
+            <select id="f-role" aria-label="Filter peran"><option value="">Semua peran</option></select>
+            <select id="f-tag" aria-label="Filter tag"><option value="">Semua tag</option></select>
+          </div>
+          <div id="list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAMBUNGAN -->
+  <section class="panel" id="p-sambung" role="tabpanel" aria-labelledby="t-sambung" hidden>
+    <div class="card" style="margin-bottom:16px">
+      <h2>Kejadian yang bisa disambung</h2>
+      <p class="sub" style="margin-bottom:14px">B menyusul A ketika perubahan di A sama dengan syarat awal di B.</p>
+      <div id="chains"></div>
+    </div>
+    <div class="card">
+      <h2>Ringkasan pola</h2>
+      <div id="patterns"></div>
+    </div>
+  </section>
+
+  <!-- JSON -->
+  <section class="panel" id="p-json" role="tabpanel" aria-labelledby="t-json" hidden>
+    <div class="card">
+      <h2>Keluaran JSON</h2>
+      <p class="sub" style="margin-bottom:12px">Ini isi database sekarang. Tempel JSON lain di sini lalu tekan Muat dari kotak untuk mengganti data.</p>
+      <textarea class="json" id="json" spellcheck="false" aria-label="Isi JSON"></textarea>
+      <div class="actions">
+        <button type="button" class="primary" id="dl-json" hidden>Unduh JSON</button>
+        <button type="button" class="primary" id="dl-csv" hidden>Unduh CSV</button>
+        <button type="button" id="copy-json">Salin JSON</button>
+        <button type="button" id="load-json">Muat dari kotak</button>
+        <button type="button" id="seed">Isi contoh data</button>
+        <button type="button" class="danger" id="wipe">Hapus semua</button>
+      </div>
+      <p class="status" id="status2" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var KEY = 'pencatat-skenario-v1';
+  var db = { scenarios: [] };
+  var editing = null;
+
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function norm(s){ return String(s || '').trim().toLowerCase(); }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function load(){
+    try { var r = localStorage.getItem(KEY); if (r) { var d = JSON.parse(r); if (d && Array.isArray(d.scenarios)) db = d; } } catch(e){}
+  }
+  function persist(){
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){}
+  }
+
+  function flash(msg){
+    ['#status','#status2'].forEach(function(id){ var el = $(id); if (el) el.textContent = msg; });
+    clearTimeout(flash.t);
+    flash.t = setTimeout(function(){ ['#status','#status2'].forEach(function(id){ var el = $(id); if (el) el.textContent = ''; }); }, 3500);
+  }
+
+  /* ---------- tabs ---------- */
+  function go(name){
+    $$('.tab').forEach(function(t){ t.setAttribute('aria-selected', t.id === 't-' + name ? 'true' : 'false'); });
+    $$('.panel').forEach(function(p){ p.hidden = p.id !== 'p-' + name; });
+    if (name === 'sambung') renderChains();
+    if (name === 'json') renderJson();
+  }
+  $$('.tab').forEach(function(t){ t.addEventListener('click', function(){ go(t.id.slice(2)); }); });
+  $$('[data-go]').forEach(function(b){ b.addEventListener('click', function(){ go(b.getAttribute('data-go')); }); });
+
+  /* ---------- theme ---------- */
+  $('#theme-btn').addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  /* ---------- form rows ---------- */
+  var ROWS = {
+    part: [['entity','Entitas (mis. S, Mobil)','entity-list'], ['role','Peran','role-list'], ['state','Kondisi awal (kunci=nilai, ...)']],
+    chg:  [['entity','Entitas','entity-list'], ['key','Atribut'], ['from','Dari'], ['to','Menjadi']],
+    req:  [['key','Atribut'], ['val','Harus bernilai']]
+  };
+  function addRow(type, box, vals){
+    vals = vals || {};
+    var div = document.createElement('div');
+    div.className = 'row row-' + type;
+    ROWS[type].forEach(function(f){
+      var i = document.createElement('input');
+      i.dataset.k = f[0]; i.placeholder = f[1]; i.value = vals[f[0]] || '';
+      i.setAttribute('aria-label', f[1]);
+      if (f[2]) i.setAttribute('list', f[2]);
+      div.appendChild(i);
+    });
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'ghost x'; b.textContent = 'Hapus baris';
+    b.addEventListener('click', function(){ div.remove(); });
+    div.appendChild(b);
+    box.appendChild(div);
+  }
+  function readRows(box){
+    return Array.prototype.slice.call(box.children).map(function(r){
+      var o = {};
+      Array.prototype.forEach.call(r.querySelectorAll('input'), function(i){ o[i.dataset.k] = i.value.trim(); });
+      return o;
+    }).filter(function(o){ return Object.keys(o).some(function(k){ return o[k]; }); });
+  }
+  function clearForm(){
+    editing = null;
+    $('#form-title').textContent = 'Skenario baru';
+    $('#save-btn').textContent = 'Simpan skenario';
+    ['#f-summary','#f-outcome','#f-tags'].forEach(function(s){ $(s).value = ''; });
+    ['#box-part','#box-chg','#box-req'].forEach(function(s){ $(s).innerHTML = ''; });
+    addRow('part', $('#box-part'), { role: 'subjek' });
+    addRow('part', $('#box-part'), { role: 'latar' });
+    addRow('part', $('#box-part'), { role: 'objek' });
+    addRow('chg', $('#box-chg'));
+    addRow('req', $('#box-req'));
+  }
+  $('#add-part').addEventListener('click', function(){ addRow('part', $('#box-part')); });
+  $('#add-chg').addEventListener('click', function(){ addRow('chg', $('#box-chg')); });
+  $('#add-req').addEventListener('click', function(){ addRow('req', $('#box-req')); });
+  $('#reset-form').addEventListener('click', clearForm);
+
+  $('#save-btn').addEventListener('click', function(){
+    var summary = $('#f-summary').value.trim();
+    if (!summary) { flash('Isi ringkasan kejadian dulu.'); $('#f-summary').focus(); return; }
+    var s = {
+      id: editing || uid(),
+      summary: summary,
+      outcome: $('#f-outcome').value.trim(),
+      tags: $('#f-tags').value.split(',').map(function(t){ return t.trim().toLowerCase(); }).filter(Boolean),
+      participants: readRows($('#box-part')),
+      changes: readRows($('#box-chg')),
+      requires: readRows($('#box-req'))
+    };
+    var idx = db.scenarios.findIndex(function(x){ return x.id === s.id; });
+    if (idx >= 0) db.scenarios[idx] = s; else db.scenarios.unshift(s);
+    persist();
+    flash(idx >= 0 ? 'Skenario diperbarui.' : 'Skenario disimpan.');
+    clearForm();
+    refresh();
+  });
+
+  /* ---------- list ---------- */
+  function editScenario(id){
+    var s = db.scenarios.find(function(x){ return x.id === id; });
+    if (!s) return;
+    editing = id;
+    $('#form-title').textContent = 'Ubah skenario';
+    $('#save-btn').textContent = 'Simpan perubahan';
+    $('#f-summary').value = s.summary || '';
+    $('#f-outcome').value = s.outcome || '';
+    $('#f-tags').value = (s.tags || []).join(', ');
+    ['#box-part','#box-chg','#box-req'].forEach(function(x){ $(x).innerHTML = ''; });
+    (s.participants || []).forEach(function(r){ addRow('part', $('#box-part'), r); });
+    (s.changes || []).forEach(function(r){ addRow('chg', $('#box-chg'), r); });
+    (s.requires || []).forEach(function(r){ addRow('req', $('#box-req'), r); });
+    if (!s.participants || !s.participants.length) addRow('part', $('#box-part'));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    $('#f-summary').focus();
+  }
+  function delScenario(id){
+    db.scenarios = db.scenarios.filter(function(x){ return x.id !== id; });
+    persist(); refresh(); flash('Skenario dihapus.');
+  }
+
+  function renderList(){
+    var q = norm($('#q').value), role = $('#f-role').value, tag = $('#f-tag').value;
+    var items = db.scenarios.filter(function(s){
+      if (tag && (s.tags || []).indexOf(tag) < 0) return false;
+      if (role && !(s.participants || []).some(function(p){ return norm(p.role) === role; })) return false;
+      if (q) {
+        var blob = norm(JSON.stringify(s));
+        if (blob.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    $('#count').textContent = items.length + (items.length !== db.scenarios.length ? ' dari ' + db.scenarios.length : '');
+    var box = $('#list');
+    if (!db.scenarios.length) {
+      box.innerHTML = '<div class="empty">Belum ada skenario. Isi form di samping, atau buka tab Keluaran JSON lalu tekan Isi contoh data.</div>';
+      return;
+    }
+    if (!items.length) { box.innerHTML = '<div class="empty">Tidak ada skenario yang cocok dengan filter.</div>'; return; }
+    box.innerHTML = items.map(function(s){
+      var parts = (s.participants || []).map(function(p){ return esc(p.entity) + ' <span class="k">(' + esc(p.role) + ')</span>'; }).join(', ');
+      var chg = (s.changes || []).map(function(c){ return '<li>' + esc(c.entity ? c.entity + '.' : '') + esc(c.key) + ': <span class="k">' + esc(c.from || '?') + '</span> menjadi <b>' + esc(c.to) + '</b></li>'; }).join('');
+      var req = (s.requires || []).map(function(r){ return '<li>' + esc(r.key) + ' = <b>' + esc(r.val) + '</b></li>'; }).join('');
+      return '<article class="card scn">' +
+        '<h3>' + esc(s.summary) + '</h3>' +
+        (s.outcome ? '<p class="out">Hasil: ' + esc(s.outcome) + '</p>' : '') +
+        ((s.tags || []).length ? '<div class="chips">' + s.tags.map(function(t){ return '<span class="chip">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+        (parts ? '<p style="margin:8px 0 0;font-size:.92rem">' + parts + '</p>' : '') +
+        (chg ? '<p class="k" style="margin:8px 0 0;font-size:.85rem">Perubahan</p><ul>' + chg + '</ul>' : '') +
+        (req ? '<p class="k" style="margin:8px 0 0;font-size:.85rem">Syarat awal</p><ul>' + req + '</ul>' : '') +
+        '<div class="btns"><button type="button" data-edit="' + esc(s.id) + '">Ubah</button><button type="button" class="danger" data-del="' + esc(s.id) + '">Hapus</button></div>' +
+        '</article>';
+    }).join('');
+    $$('[data-edit]').forEach(function(b){ b.addEventListener('click', function(){ editScenario(b.getAttribute('data-edit')); }); });
+    $$('[data-del]').forEach(function(b){ b.addEventListener('click', function(){ delScenario(b.getAttribute('data-del')); }); });
+  }
+  ['#q','#f-role','#f-tag'].forEach(function(s){ $(s).addEventListener('input', renderList); });
+
+  function uniqueSorted(arr){ return Array.from(new Set(arr.filter(Boolean))).sort(); }
+  function refreshLookups(){
+    var roles = uniqueSorted([].concat.apply([], db.scenarios.map(function(s){ return (s.participants || []).map(function(p){ return norm(p.role); }); })));
+    var tags = uniqueSorted([].concat.apply([], db.scenarios.map(function(s){ return s.tags || []; })));
+    var ents = uniqueSorted([].concat.apply([], db.scenarios.map(function(s){
+      return (s.participants || []).map(function(p){ return p.entity; }).concat((s.changes || []).map(function(c){ return c.entity; }));
+    })));
+    function fill(sel, first, list){
+      var el = $(sel), cur = el.value;
+      el.innerHTML = '<option value="">' + first + '</option>' + list.map(function(x){ return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
+      if (list.indexOf(cur) >= 0) el.value = cur;
+    }
+    fill('#f-role', 'Semua peran', roles);
+    fill('#f-tag', 'Semua tag', tags);
+    var rl = uniqueSorted(['subjek', 'latar', 'objek'].concat(roles));
+    $('#role-list').innerHTML = rl.map(function(x){ return '<option value="' + esc(x) + '">'; }).join('');
+    $('#entity-list').innerHTML = ents.map(function(x){ return '<option value="' + esc(x) + '">'; }).join('');
+  }
+
+  /* ---------- chains + patterns ---------- */
+  function computeChains(){
+    var out = [], seen = {};
+    db.scenarios.forEach(function(a){
+      db.scenarios.forEach(function(b){
+        if (a.id === b.id) return;
+        (b.requires || []).forEach(function(r){
+          (a.changes || []).forEach(function(c){
+            if (norm(c.key) === norm(r.key) && norm(c.to) === norm(r.val)) {
+              var label = (c.entity ? c.entity + '.' : '') + c.key + ' = ' + c.to;
+              var k = a.id + '>' + b.id + '>' + label;
+              if (!seen[k]) { seen[k] = 1; out.push({ a: a, b: b, label: label }); }
+            }
+          });
+        });
+      });
+    });
+    return out;
+  }
+  function renderChains(){
+    var ch = computeChains();
+    var box = $('#chains');
+    if (!ch.length) {
+      box.innerHTML = '<div class="empty">Belum ada sambungan. Isi Perubahan kondisi di satu skenario dan Syarat awal di skenario lain dengan atribut dan nilai yang sama.</div>';
+    } else {
+      box.innerHTML = ch.map(function(c){
+        return '<div class="chain">' +
+          '<div class="node"><small>Lebih dulu</small>' + esc(c.a.summary) + '</div>' +
+          '<div class="link"><i></i><span>' + esc(c.label) + '</span><i></i></div>' +
+          '<div class="node"><small>Menyusul</small>' + esc(c.b.summary) + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    function count(list){
+      var m = {};
+      list.forEach(function(x){ if (x) m[x] = (m[x] || 0) + 1; });
+      return Object.keys(m).sort(function(a, b){ return m[b] - m[a]; }).map(function(k){ return '<span class="chip">' + esc(k) + '<b>' + m[k] + '</b></span>'; }).join('') || '<span class="k">Belum ada data.</span>';
+    }
+    var tagList = [].concat.apply([], db.scenarios.map(function(s){ return s.tags || []; }));
+    var roleList = [].concat.apply([], db.scenarios.map(function(s){ return (s.participants || []).map(function(p){ return norm(p.role); }); }));
+    var entRoles = {};
+    db.scenarios.forEach(function(s){ (s.participants || []).forEach(function(p){
+      if (!p.entity) return;
+      var k = p.entity + ' sebagai ' + norm(p.role);
+      entRoles[k] = (entRoles[k] || 0) + 1;
+    }); });
+    var er = Object.keys(entRoles).sort(function(a, b){ return entRoles[b] - entRoles[a]; }).map(function(k){ return '<span class="chip">' + esc(k) + '<b>' + entRoles[k] + '</b></span>'; }).join('') || '<span class="k">Belum ada data.</span>';
+    $('#patterns').innerHTML =
+      '<h3>Tag yang sering muncul</h3><div class="chips" style="margin-bottom:14px">' + count(tagList) + '</div>' +
+      '<h3>Peran yang sering dipakai</h3><div class="chips" style="margin-bottom:14px">' + count(roleList) + '</div>' +
+      '<h3>Entitas dan perannya</h3><div class="chips">' + er + '</div>';
+  }
+
+  /* ---------- json ---------- */
+  function buildExport(){
+    var ents = {};
+    db.scenarios.forEach(function(s){
+      (s.participants || []).forEach(function(p){
+        if (!p.entity) return;
+        var e = ents[p.entity] || (ents[p.entity] = { name: p.entity, roles: [], scenarios: 0 });
+        if (norm(p.role) && e.roles.indexOf(norm(p.role)) < 0) e.roles.push(norm(p.role));
+        e.scenarios++;
+      });
+    });
+    return { entities: Object.keys(ents).map(function(k){ return ents[k]; }), scenarios: db.scenarios, chains: computeChains().map(function(c){ return { dari: c.a.id, ke: c.b.id, lewat: c.label }; }) };
+  }
+  function renderJson(){ $('#json').value = JSON.stringify(buildExport(), null, 2); }
+
+  $('#copy-json').addEventListener('click', function(){
+    var t = $('#json'); t.select();
+    var done = function(){ flash('JSON disalin.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t.value).then(done, function(){ try { document.execCommand('copy'); done(); } catch(e){ flash('Salin manual dari kotak.'); } });
+    } else { try { document.execCommand('copy'); done(); } catch(e){ flash('Salin manual dari kotak.'); } }
+  });
+  /* ---------- export (unduh file) ---------- */
+  var downloads = null;
+  function csvCell(v){
+    var s = String(v == null ? '' : v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function buildCsv(){
+    var head = ['id', 'ringkasan', 'hasil', 'tag', 'pelaku', 'perubahan', 'syarat_awal'];
+    var rows = db.scenarios.map(function(s){
+      return [
+        s.id, s.summary, s.outcome,
+        (s.tags || []).join('; '),
+        (s.participants || []).map(function(p){ return p.entity + ' (' + p.role + ')' + (p.state ? ' [' + p.state + ']' : ''); }).join('; '),
+        (s.changes || []).map(function(c){ return (c.entity ? c.entity + '.' : '') + c.key + ': ' + (c.from || '?') + ' > ' + c.to; }).join('; '),
+        (s.requires || []).map(function(r){ return r.key + ' = ' + r.val; }).join('; ')
+      ].map(csvCell).join(',');
+    });
+    return '\uFEFF' + [head.join(',')].concat(rows).join('\r\n');
+  }
+  function stamp(){ return new Date().toISOString().slice(0, 10); }
+  function saveFile(name, data){
+    if (!downloads) { flash('Unduh tidak tersedia di sini. Pakai Salin JSON.'); return; }
+    if (!db.scenarios.length) { flash('Belum ada data untuk diunduh.'); return; }
+    downloads.save({ filename: name, data: data }).then(function(){
+      flash('File ' + name + ' siap disimpan.');
+    }, function(e){
+      var c = e && e.code;
+      if (c === 'declined') flash('Unduhan dibatalkan.');
+      else if (c === 'rate_limited') flash('Tunggu sebentar, lalu coba lagi.');
+      else flash('Unduh gagal. Pakai Salin JSON.');
+    });
+  }
+  $('#dl-json').addEventListener('click', function(){ saveFile('skenario-' + stamp() + '.json', JSON.stringify(buildExport(), null, 2)); });
+  $('#dl-csv').addEventListener('click', function(){ saveFile('skenario-' + stamp() + '.csv', buildCsv()); });
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('downloads').then(function(d){
+        if (d) { downloads = d; $('#dl-json').hidden = false; $('#dl-csv').hidden = false; }
+      }, function(){});
+    }
+  } catch(e){}
+
+  $('#load-json').addEventListener('click', function(){
+    try {
+      var d = JSON.parse($('#json').value);
+      var list = Array.isArray(d) ? d : d.scenarios;
+      if (!Array.isArray(list)) throw new Error('bentuk salah');
+      db.scenarios = list.map(function(s){ s.id = s.id || uid(); return s; });
+      persist(); refresh(); flash('Data dimuat: ' + db.scenarios.length + ' skenario.');
+    } catch(e){ flash('JSON tidak valid. Periksa tanda kurung dan koma.'); }
+  });
+  var wipeArmed = false;
+  $('#wipe').addEventListener('click', function(){
+    var b = $('#wipe');
+    if (!wipeArmed) { wipeArmed = true; b.textContent = 'Klik lagi untuk hapus semua'; setTimeout(function(){ wipeArmed = false; b.textContent = 'Hapus semua'; }, 3000); return; }
+    wipeArmed = false; b.textContent = 'Hapus semua';
+    db.scenarios = []; persist(); refresh(); flash('Semua data dihapus.');
+  });
+
+  /* ---------- sample data ---------- */
+  function P(e, r, st){ return { entity: e, role: r, state: st || '' }; }
+  function sample(){
+    return [
+      { id: uid(), summary: 'Mobil S mogok di jalan ke kampus', outcome: 'S terlambat masuk kelas', tags: ['kendala', 'transportasi'],
+        participants: [P('S','subjek','usia=20'), P('Kampus','latar'), P('Mobil','objek','kondisi=lama')],
+        changes: [{ entity:'Mobil', key:'kondisi', from:'lama', to:'rusak' }], requires: [] },
+      { id: uid(), summary: 'S kebut-kebutan di area kampus dan menabrak pagar', outcome: 'Mobil penyok, S harus ganti rugi', tags: ['aksi-risiko', 'konsekuensi'],
+        participants: [P('S','subjek','emosi=impulsif'), P('Kampus','latar'), P('Mobil','objek','kondisi=bagus')],
+        changes: [{ entity:'Mobil', key:'kondisi', from:'bagus', to:'rusak' }, { entity:'S', key:'uang', from:'cukup', to:'kurang' }], requires: [] },
+      { id: uid(), summary: 'S naik angkot ke kampus karena mobil di bengkel', outcome: 'S sampai kampus tanpa mobil', tags: ['transportasi', 'adaptasi'],
+        participants: [P('S','subjek'), P('Kampus','latar'), P('Mobil','objek','kondisi=rusak')],
+        changes: [{ entity:'S', key:'transportasi', from:'mobil', to:'angkot' }], requires: [{ key:'kondisi', val:'rusak' }] },
+      { id: uid(), summary: 'S cari kerja sampingan untuk menutup biaya', outcome: 'Uang S kembali cukup', tags: ['uang', 'adaptasi'],
+        participants: [P('S','subjek','uang=kurang'), P('Kampus','latar')],
+        changes: [{ entity:'S', key:'uang', from:'kurang', to:'cukup' }], requires: [{ key:'uang', val:'kurang' }] },
+      { id: uid(), summary: 'S pamer mobil baru ke teman nongkrong', outcome: 'Status sosial S naik', tags: ['sosial', 'status'],
+        participants: [P('S','subjek'), P('Teman','pihak-lain'), P('Kampus','latar'), P('Mobil','objek','kondisi=baru')],
+        changes: [{ entity:'Mobil', key:'kondisi', from:'', to:'baru' }, { entity:'S', key:'status sosial', from:'biasa', to:'naik' }], requires: [] },
+      { id: uid(), summary: 'Mobil baru S parkir di area dosen', outcome: 'S ditegur satpam', tags: ['sosial', 'aturan'],
+        participants: [P('S','subjek'), P('Satpam','pihak-lain'), P('Kampus','latar'), P('Mobil','objek','kondisi=baru')],
+        changes: [{ entity:'S', key:'teguran', from:'tidak', to:'ya' }], requires: [{ key:'kondisi', val:'baru' }] }
+    ];
+  }
+  $('#seed').addEventListener('click', function(){
+    db.scenarios = sample().concat(db.scenarios);
+    persist(); refresh(); flash('Contoh ditambahkan. Lihat tab Sambungan.');
+  });
+
+  function refresh(){
+    refreshLookups(); renderList(); renderJson();
+    if (!$('#p-sambung').hidden) renderChains();
+  }
+
+  load();
+  clearForm();
+  refresh();
+})();
+</script>
+</body>
+</html>
