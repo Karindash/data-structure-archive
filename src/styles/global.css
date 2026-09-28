@@ -1,0 +1,159 @@
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  
+  /* Light theme colors */
+  --bg: #eef1f5;
+  --surface: #fbfcfd;
+  --ink: #1b2340;
+  --muted: #5b6482;
+  --line: #cfd6e2;
+  --accent: #1f6f6b;
+  --accent-ink: #ffffff;
+  --mark: #f2c94c;
+  --danger: #b3372f;
+  --tint: #e3efee;
+  
+  /* Fonts */
+  --head: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Dark theme - auto based on system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141a2b;
+    --surface: #1c2439;
+    --ink: #e6eaf6;
+    --muted: #9aa3c0;
+    --line: #2f3a58;
+    --accent: #5cc3bb;
+    --accent-ink: #0f1a2a;
+    --mark: #e0b93f;
+    --danger: #ff8b82;
+    --tint: #1e3038;
+  }
+}
+
+/* Dark theme - explicit */
+:root[data-theme="dark"] {
+  --bg: #141a2b;
+  --surface: #1c2439;
+  --ink: #e6eaf6;
+  --muted: #9aa3c0;
+  --line: #2f3a58;
+  --accent: #5cc3bb;
+  --accent-ink: #0f1a2a;
+  --mark: #e0b93f;
+  --danger: #ff8b82;
+  --tint: #1e3038;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--body);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+h1 {
+  font: 700 clamp(1.7rem, 4vw, 2.4rem)/1.1 var(--head);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font: 700 1.25rem/1.2 var(--head);
+  margin: 0 0 10px;
+}
+
+h3 {
+  font: 600 1rem/1.3 var(--head);
+  margin: 0 0 6px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+button.ghost {
+  background: transparent;
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 40px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin: 0 0 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
